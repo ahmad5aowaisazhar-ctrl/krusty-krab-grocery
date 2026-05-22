@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧽 Krusty Krab Grocery & Electronics 🍍</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+        :root {
+            --spongebob-yellow: #FFD700;
+            --spongebob-blue: #1E90FF;
+            --spongebob-pink: #FF69B4;
+            --spongebob-green: #32CD32;
+            --spongebob-purple: #9370DB;
+            --spongebob-orange: #FF8C00;
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        body {
+            font-family: 'Nunito', 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FFEB99 0%, #87CEEB 100%);
+            min-height: 100vh;
+            color: #00008B;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes slide-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(135deg, #FFFACD 0%, #FFEB99 100%);
+            border-bottom: 4px solid var(--spongebob-blue);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            color: var(--spongebob-blue);
+            text-shadow: 2px 2px 4px rgba(255,215,0,0.5);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .cart-badge {
+            font-size: 2rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--spongebob-pink);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .search-container {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+            border: 3px solid var(--spongebob-yellow);
+            border-radius: 50px;
+            font-size: 1rem;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--spongebob-blue);
+            box-shadow: 0 6px 20px rgba(30,144,255,0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .category-badge {
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border: 3px solid var(--spongebob-yellow);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--spongebob-blue);
+            transition: all 150ms var(--ease-out);
+            white-space: nowrap;
+        }
+
+        .category-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .category-badge.active {
+            background: linear-gradient(135deg, var(--spongebob-yellow), var(--spongebob-orange));
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid var(--spongebob-yellow);
+            transition: all 150ms var(--ease-out);
+            animation: slide-in-up 400ms var(--ease-out);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+
+        .product-emoji {
+            font-size: 3rem;
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #FFFACD, #FFEB99);
+            border-bottom: 2px solid var(--spongebob-yellow);
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-name {
+            font-size: 0.95rem;
+            color: var(--spongebob-blue);
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            color: var(--spongebob-green);
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 0.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 150ms var(--ease-out);
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .btn-spongebob {
+            background: linear-gradient(135deg, var(--spongebob-yellow), var(--spongebob-orange));
+            color: var(--spongebob-blue);
+            border: 2px solid var(--spongebob-blue);
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .btn-spongebob:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: slide-in-up 400ms var(--ease-out);
+        }
+
+        .cart-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .cart-items {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 3px solid var(--spongebob-yellow);
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 100px;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #FFFACD, #FFEB99);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--spongebob-yellow);
+        }
+
+        .cart-item-emoji {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cart-item-details h3 {
+            color: var(--spongebob-blue);
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .cart-item-price {
+            color: var(--spongebob-green);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            gap: 0.3rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn {
+            background: var(--spongebob-blue);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn {
+            background: var(--spongebob-pink);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .cart-summary {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 3px solid var(--spongebob-yellow);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid var(--spongebob-yellow);
+            padding-top: 0.75rem;
+            font-size: 1.1rem;
+            color: var(--spongebob-green);
+            font-weight: bold;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .payment-methods {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 3px solid var(--spongebob-yellow);
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #FFFACD, #FFEB99);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            border: 2px solid var(--spongebob-yellow);
+        }
+
+        .payment-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .mobile-pay-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .mobile-pay-btn {
+            background: linear-gradient(135deg, #FFFACD, #FFEB99);
+            border: 3px solid var(--spongebob-yellow);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 150ms var(--ease-out);
+        }
+
+        .mobile-pay-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(255,215,0,0.3);
+        }
+
+        .mobile-pay-icon {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .mobile-pay-label {
+            font-weight: bold;
+            color: var(--spongebob-blue);
+            font-size: 0.9rem;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 3px solid var(--spongebob-yellow);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .confirmation-page {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .success-message {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            color: var(--spongebob-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .order-details {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 3px solid var(--spongebob-yellow);
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            text-align: left;
+        }
+
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, var(--spongebob-green), #00AA00);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 150ms var(--ease-out);
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .cart-container,
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-summary,
+            .order-summary {
+                position: static;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <h1 class="header-title">🧽 Krusty Krab Grocery & Electronics 🍍</h1>
+            <div class="header-actions">
+                <div class="cart-badge" onclick="app.goToCart()">
+                    🛒
+                    <span class="badge" id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Search products..." oninput="app.handleSearch()">
+        </div>
+    </div>
+
+    <!-- CATALOG PAGE -->
+    <div id="catalog-page" class="page active">
+        <div class="container">
+            <div class="category-filters" id="category-filters"></div>
+            <div class="products-grid" id="products-grid"></div>
+        </div>
+    </div>
+
+    <!-- CART PAGE -->
+    <div id="cart-page" class="page">
+        <div class="container">
+            <button class="btn btn-spongebob" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--spongebob-blue), #0066CC); color: white; width: auto;" onclick="app.goToCatalog()">← Back</button>
+            <div class="cart-container">
+                <div class="cart-items" id="cart-items"></div>
+                <div class="cart-summary">
+                    <h2 style="color: var(--spongebob-blue); margin-bottom: 1rem;">Cart Summary</h2>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="cart-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (8%):</span>
+                        <span id="cart-tax">$0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="cart-total">$0.00</span>
+                    </div>
+                    <button class="btn btn-spongebob" style="margin-top: 1rem;" onclick="app.goToCheckout()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKOUT PAGE -->
+    <div id="checkout-page" class="page">
+        <div class="container">
+            <button class="btn btn-spongebob" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--spongebob-blue), #0066CC); color: white; width: auto;" onclick="app.goToCatalog()">← Back</button>
+            <div class="checkout-container">
+                <div class="payment-methods">
+                    <h2 style="color: var(--spongebob-blue); margin-bottom: 1rem; font-size: 1.1rem;">Payment Method</h2>
+                    
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="apple_pay" checked onchange="app.selectPaymentMethod('apple_pay')">
+                        <label style="margin: 0; cursor: pointer;">🍎 Apple Pay</label>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="samsung_pay" onchange="app.selectPaymentMethod('samsung_pay')">
+                        <label style="margin: 0; cursor: pointer;">📱 Samsung Pay</label>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="google_pay" onchange="app.selectPaymentMethod('google_pay')">
+                        <label style="margin: 0; cursor: pointer;">🔵 Google Pay</label>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="mobile_pay" onchange="app.selectPaymentMethod('mobile_pay')">
+                        <label style="margin: 0; cursor: pointer;">📲 Mobile Pay</label>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="card" onchange="app.selectPaymentMethod('card')">
+                        <label style="margin: 0; cursor: pointer;">💳 Card</label>
+                    </label>
+
+                    <div id="apple-pay-section">
+                        <div class="mobile-pay-buttons">
+                            <div class="mobile-pay-btn" onclick="app.processPayment('apple_pay')">
+                                <div class="mobile-pay-icon">🍎</div>
+                                <div class="mobile-pay-label">Pay with Apple Pay</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="samsung-pay-section" style="display: none;">
+                        <div class="mobile-pay-buttons">
+                            <div class="mobile-pay-btn" onclick="app.processPayment('samsung_pay')">
+                                <div class="mobile-pay-icon">📱</div>
+                                <div class="mobile-pay-label">Pay with Samsung Pay</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="google-pay-section" style="display: none;">
+                        <div class="mobile-pay-buttons">
+                            <div class="mobile-pay-btn" onclick="app.processPayment('google_pay')">
+                                <div class="mobile-pay-icon">🔵</div>
+                                <div class="mobile-pay-label">Pay with Google Pay</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="mobile-pay-section" style="display: none;">
+                        <div class="mobile-pay-buttons">
+                            <div class="mobile-pay-btn" onclick="app.processPayment('mobile_pay')">
+                                <div class="mobile-pay-icon">📲</div>
+                                <div class="mobile-pay-label">Tap to Pay</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="card-pay-section" style="display: none;">
+                        <div style="background: linear-gradient(135deg, #FFFACD, #FFEB99); border-radius: 1rem; padding: 1.5rem; border: 3px solid var(--spongebob-yellow); margin-top: 1rem;">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; color: var(--spongebob-blue); font-weight: bold; margin-bottom: 0.3rem; font-size: 0.9rem;">Card Number</label>
+                                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" style="width: 100%; padding: 0.6rem; border: 2px solid var(--spongebob-yellow); border-radius: 0.5rem; font-size: 0.9rem;" oninput="app.formatCardNumber(this)">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label style="display: block; color: var(--spongebob-blue); font-weight: bold; margin-bottom: 0.3rem; font-size: 0.9rem;">Expiry</label>
+                                    <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 0.6rem; border: 2px solid var(--spongebob-yellow); border-radius: 0.5rem; font-size: 0.9rem;" oninput="app.formatExpiry(this)">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: var(--spongebob-blue); font-weight: bold; margin-bottom: 0.3rem; font-size: 0.9rem;">CVV</label>
+                                    <input type="text" id="card-cvv" placeholder="123" maxlength="4" style="width: 100%; padding: 0.6rem; border: 2px solid var(--spongebob-yellow); border-radius: 0.5rem; font-size: 0.9rem;">
+                                </div>
+                            </div>
+                            <button class="btn btn-spongebob" onclick="app.processPayment('card')">💳 Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h2 style="color: var(--spongebob-blue); margin-bottom: 1rem; font-size: 1.1rem;">Order Summary</h2>
+                    <div id="checkout-items" style="max-height: 250px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.9rem;"></div>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="checkout-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (8%):</span>
+                        <span id="checkout-tax">$0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="checkout-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION PAGE -->
+    <div id="confirmation-page" class="page">
+        <div class="container">
+            <div class="confirmation-page">
+                <div class="success-message">🎉</div>
+                <h1 class="success-title">Order Confirmed! 🍍</h1>
+
+                <div class="order-details">
+                    <div class="order-detail-row">
+                        <span style="font-weight: bold; color: var(--spongebob-blue);">Order #:</span>
+                        <span style="color: var(--spongebob-green); font-weight: bold;" id="order-number">#0000</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span style="font-weight: bold; color: var(--spongebob-blue);">Date:</span>
+                        <span id="order-date">-</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span style="font-weight: bold; color: var(--spongebob-blue);">Payment:</span>
+                        <span id="payment-method-display">-</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span style="font-weight: bold; color: var(--spongebob-blue);">Total:</span>
+                        <span style="color: var(--spongebob-green); font-weight: bold;" id="confirmation-total">$0.00</span>
+                    </div>
+                </div>
+
+                <p style="color: #666; margin-bottom: 1.5rem; font-size: 1rem;">Ar ar ar ar ar! Money money money! 💰</p>
+
+                <button class="continue-btn" onclick="app.goToCatalog()">Continue Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            products: [
+                // GROCERY - PRODUCE (40 products)
+                { id: 1, name: 'Bananas', price: 599, category: 'Produce', emoji: '🍌' },
+                { id: 2, name: 'Apples', price: 799, category: 'Produce', emoji: '🍎' },
+                { id: 3, name: 'Carrots', price: 649, category: 'Produce', emoji: '🥕' },
+                { id: 4, name: 'Broccoli', price: 899, category: 'Produce', emoji: '🥦' },
+                { id: 5, name: 'Tomatoes', price: 749, category: 'Produce', emoji: '🍅' },
+                { id: 6, name: 'Lettuce', price: 699, category: 'Produce', emoji: '🥬' },
+                { id: 7, name: 'Oranges', price: 749, category: 'Produce', emoji: '🍊' },
+                { id: 8, name: 'Grapes', price: 899, category: 'Produce', emoji: '🍇' },
+                { id: 9, name: 'Strawberries', price: 1199, category: 'Produce', emoji: '🍓' },
+                { id: 10, name: 'Blueberries', price: 1399, category: 'Produce', emoji: '🫐' },
+                { id: 11, name: 'Spinach', price: 599, category: 'Produce', emoji: '🥬' },
+                { id: 12, name: 'Bell Peppers', price: 749, category: 'Produce', emoji: '🫑' },
+                { id: 13, name: 'Cucumbers', price: 649, category: 'Produce', emoji: '🥒' },
+                { id: 14, name: 'Onions', price: 549, category: 'Produce', emoji: '🧅' },
+                { id: 15, name: 'Garlic', price: 399, category: 'Produce', emoji: '🧄' },
+                { id: 16, name: 'Potatoes', price: 699, category: 'Produce', emoji: '🥔' },
+                { id: 17, name: 'Sweet Potatoes', price: 749, category: 'Produce', emoji: '🍠' },
+                { id: 18, name: 'Corn', price: 599, category: 'Produce', emoji: '🌽' },
+                { id: 19, name: 'Avocados', price: 899, category: 'Produce', emoji: '🥑' },
+                { id: 20, name: 'Lemons', price: 649, category: 'Produce', emoji: '🍋' },
+                { id: 21, name: 'Limes', price: 649, category: 'Produce', emoji: '🍋' },
+                { id: 22, name: 'Watermelon', price: 1499, category: 'Produce', emoji: '🍉' },
+                { id: 23, name: 'Cantaloupe', price: 1299, category: 'Produce', emoji: '🍈' },
+                { id: 24, name: 'Pineapple', price: 1199, category: 'Produce', emoji: '🍍' },
+                { id: 25, name: 'Mangoes', price: 999, category: 'Produce', emoji: '🥭' },
+                { id: 26, name: 'Kiwi', price: 849, category: 'Produce', emoji: '🥝' },
+                { id: 27, name: 'Peaches', price: 899, category: 'Produce', emoji: '🍑' },
+                { id: 28, name: 'Pears', price: 799, category: 'Produce', emoji: '🍐' },
+                { id: 29, name: 'Plums', price: 849, category: 'Produce', emoji: '🍑' },
+                { id: 30, name: 'Cherries', price: 1299, category: 'Produce', emoji: '🍒' },
+                { id: 31, name: 'Celery', price: 549, category: 'Produce', emoji: '🥬' },
+                { id: 32, name: 'Cabbage', price: 599, category: 'Produce', emoji: '🥬' },
+                { id: 33, name: 'Kale', price: 649, category: 'Produce', emoji: '🥬' },
+                { id: 34, name: 'Green Beans', price: 749, category: 'Produce', emoji: '🫘' },
+                { id: 35, name: 'Peas', price: 649, category: 'Produce', emoji: '🫘' },
+                { id: 36, name: 'Mushrooms', price: 799, category: 'Produce', emoji: '🍄' },
+                { id: 37, name: 'Zucchini', price: 649, category: 'Produce', emoji: '🥒' },
+                { id: 38, name: 'Eggplant', price: 749, category: 'Produce', emoji: '🍆' },
+                { id: 39, name: 'Radishes', price: 499, category: 'Produce', emoji: '🥬' },
+                { id: 40, name: 'Turnips', price: 549, category: 'Produce', emoji: '🥔' },
+
+                // GROCERY - DAIRY (30 products)
+                { id: 41, name: 'Milk', price: 1299, category: 'Dairy', emoji: '🥛' },
+                { id: 42, name: 'Cheese', price: 1599, category: 'Dairy', emoji: '🧀' },
+                { id: 43, name: 'Yogurt', price: 999, category: 'Dairy', emoji: '🥛' },
+                { id: 44, name: 'Butter', price: 1399, category: 'Dairy', emoji: '🧈' },
+                { id: 45, name: 'Eggs', price: 1199, category: 'Dairy', emoji: '🥚' },
+                { id: 46, name: 'Cream Cheese', price: 1299, category: 'Dairy', emoji: '🧀' },
+                { id: 47, name: 'Sour Cream', price: 899, category: 'Dairy', emoji: '🥛' },
+                { id: 48, name: 'Cottage Cheese', price: 999, category: 'Dairy', emoji: '🧀' },
+                { id: 49, name: 'Mozzarella', price: 1399, category: 'Dairy', emoji: '🧀' },
+                { id: 50, name: 'Cheddar', price: 1499, category: 'Dairy', emoji: '🧀' },
+                { id: 51, name: 'Feta Cheese', price: 1599, category: 'Dairy', emoji: '🧀' },
+                { id: 52, name: 'Swiss Cheese', price: 1699, category: 'Dairy', emoji: '🧀' },
+                { id: 53, name: 'Greek Yogurt', price: 1199, category: 'Dairy', emoji: '🥛' },
+                { id: 54, name: 'Almond Milk', price: 999, category: 'Dairy', emoji: '🥛' },
+                { id: 55, name: 'Oat Milk', price: 999, category: 'Dairy', emoji: '🥛' },
+                { id: 56, name: 'Soy Milk', price: 899, category: 'Dairy', emoji: '🥛' },
+                { id: 57, name: 'Coconut Milk', price: 1099, category: 'Dairy', emoji: '🥥' },
+                { id: 58, name: 'Whipped Cream', price: 699, category: 'Dairy', emoji: '🍦' },
+                { id: 59, name: 'Milk Chocolate', price: 799, category: 'Dairy', emoji: '🍫' },
+                { id: 60, name: 'Ricotta', price: 1199, category: 'Dairy', emoji: '🧀' },
+                { id: 61, name: 'Gouda Cheese', price: 1699, category: 'Dairy', emoji: '🧀' },
+                { id: 62, name: 'Parmesan', price: 1799, category: 'Dairy', emoji: '🧀' },
+                { id: 63, name: 'Blue Cheese', price: 1899, category: 'Dairy', emoji: '🧀' },
+                { id: 64, name: 'String Cheese', price: 999, category: 'Dairy', emoji: '🧀' },
+                { id: 65, name: 'Cream', price: 899, category: 'Dairy', emoji: '🥛' },
+                { id: 66, name: 'Milk 2%', price: 1199, category: 'Dairy', emoji: '🥛' },
+                { id: 67, name: 'Skim Milk', price: 1099, category: 'Dairy', emoji: '🥛' },
+                { id: 68, name: 'Whole Milk', price: 1299, category: 'Dairy', emoji: '🥛' },
+                { id: 69, name: 'Buttermilk', price: 999, category: 'Dairy', emoji: '🥛' },
+                { id: 70, name: 'Kefir', price: 1199, category: 'Dairy', emoji: '🥛' },
+
+                // GROCERY - SNACKS (35 products)
+                { id: 71, name: 'Chips', price: 799, category: 'Snacks', emoji: '🥔' },
+                { id: 72, name: 'Cookies', price: 999, category: 'Snacks', emoji: '🍪' },
+                { id: 73, name: 'Popcorn', price: 749, category: 'Snacks', emoji: '🍿' },
+                { id: 74, name: 'Nuts', price: 1399, category: 'Snacks', emoji: '🥜' },
+                { id: 75, name: 'Granola', price: 1199, category: 'Snacks', emoji: '🌾' },
+                { id: 76, name: 'Crackers', price: 749, category: 'Snacks', emoji: '🍘' },
+                { id: 77, name: 'Pretzels', price: 699, category: 'Snacks', emoji: '🥨' },
+                { id: 78, name: 'Candy', price: 599, category: 'Snacks', emoji: '🍬' },
+                { id: 79, name: 'Chocolate', price: 899, category: 'Snacks', emoji: '🍫' },
+                { id: 80, name: 'Gummy Bears', price: 649, category: 'Snacks', emoji: '🍬' },
+                { id: 81, name: 'Trail Mix', price: 1099, category: 'Snacks', emoji: '🥜' },
+                { id: 82, name: 'Beef Jerky', price: 1299, category: 'Snacks', emoji: '🥩' },
+                { id: 83, name: 'Protein Bars', price: 999, category: 'Snacks', emoji: '🍫' },
+                { id: 84, name: 'Granola Bars', price: 899, category: 'Snacks', emoji: '🌾' },
+                { id: 85, name: 'Fruit Snacks', price: 749, category: 'Snacks', emoji: '🍓' },
+                { id: 86, name: 'Dried Fruit', price: 1199, category: 'Snacks', emoji: '🍇' },
+                { id: 87, name: 'Almonds', price: 1499, category: 'Snacks', emoji: '🥜' },
+                { id: 88, name: 'Cashews', price: 1599, category: 'Snacks', emoji: '🥜' },
+                { id: 89, name: 'Walnuts', price: 1399, category: 'Snacks', emoji: '🥜' },
+                { id: 90, name: 'Peanuts', price: 999, category: 'Snacks', emoji: '🥜' },
+                { id: 91, name: 'Sunflower Seeds', price: 1099, category: 'Snacks', emoji: '🌻' },
+                { id: 92, name: 'Pumpkin Seeds', price: 1199, category: 'Snacks', emoji: '🎃' },
+                { id: 93, name: 'Tortilla Chips', price: 799, category: 'Snacks', emoji: '🥔' },
+                { id: 94, name: 'Corn Chips', price: 749, category: 'Snacks', emoji: '🌽' },
+                { id: 95, name: 'Cheese Puffs', price: 899, category: 'Snacks', emoji: '🧀' },
+                { id: 96, name: 'Doritos', price: 899, category: 'Snacks', emoji: '🥔' },
+                { id: 97, name: 'Cheetos', price: 899, category: 'Snacks', emoji: '🧡' },
+                { id: 98, name: 'Lay\'s Chips', price: 799, category: 'Snacks', emoji: '🥔' },
+                { id: 99, name: 'Ritz Crackers', price: 749, category: 'Snacks', emoji: '🍘' },
+                { id: 100, name: 'Oreos', price: 999, category: 'Snacks', emoji: '🍪' },
+                { id: 101, name: 'Pringles', price: 899, category: 'Snacks', emoji: '🥔' },
+                { id: 102, name: 'Cheez-Its', price: 749, category: 'Snacks', emoji: '🧀' },
+                { id: 103, name: 'Goldfish', price: 699, category: 'Snacks', emoji: '🐟' },
+                { id: 104, name: 'Pop-Tarts', price: 849, category: 'Snacks', emoji: '🍪' },
+                { id: 105, name: 'Twinkies', price: 799, category: 'Snacks', emoji: '🍰' },
+
+                // GROCERY - BEVERAGES (35 products)
+                { id: 106, name: 'Orange Juice', price: 1199, category: 'Beverages', emoji: '🧡' },
+                { id: 107, name: 'Coffee', price: 2399, category: 'Beverages', emoji: '☕' },
+                { id: 108, name: 'Tea', price: 1399, category: 'Beverages', emoji: '🍵' },
+                { id: 109, name: 'Soda', price: 799, category: 'Beverages', emoji: '🥤' },
+                { id: 110, name: 'Water', price: 499, category: 'Beverages', emoji: '💧' },
+                { id: 111, name: 'Lemonade', price: 899, category: 'Beverages', emoji: '🍋' },
+                { id: 112, name: 'Iced Tea', price: 999, category: 'Beverages', emoji: '🍵' },
+                { id: 113, name: 'Sports Drink', price: 699, category: 'Beverages', emoji: '💪' },
+                { id: 114, name: 'Energy Drink', price: 899, category: 'Beverages', emoji: '⚡' },
+                { id: 115, name: 'Coconut Water', price: 1099, category: 'Beverages', emoji: '🥥' },
+                { id: 116, name: 'Almond Milk', price: 999, category: 'Beverages', emoji: '🥛' },
+                { id: 117, name: 'Oat Milk', price: 999, category: 'Beverages', emoji: '🥛' },
+                { id: 118, name: 'Soy Milk', price: 899, category: 'Beverages', emoji: '🥛' },
+                { id: 119, name: 'Juice Box', price: 599, category: 'Beverages', emoji: '🧃' },
+                { id: 120, name: 'Apple Juice', price: 999, category: 'Beverages', emoji: '🍎' },
+                { id: 121, name: 'Cranberry Juice', price: 1099, category: 'Beverages', emoji: '🍒' },
+                { id: 122, name: 'Grape Juice', price: 999, category: 'Beverages', emoji: '🍇' },
+                { id: 123, name: 'Tomato Juice', price: 899, category: 'Beverages', emoji: '🍅' },
+                { id: 124, name: 'Smoothie', price: 1299, category: 'Beverages', emoji: '🥤' },
+                { id: 125, name: 'Protein Shake', price: 1399, category: 'Beverages', emoji: '💪' },
+                { id: 126, name: 'Coffee Beans', price: 2999, category: 'Beverages', emoji: '☕' },
+                { id: 127, name: 'Ground Coffee', price: 2199, category: 'Beverages', emoji: '☕' },
+                { id: 128, name: 'Instant Coffee', price: 1799, category: 'Beverages', emoji: '☕' },
+                { id: 129, name: 'Green Tea', price: 1299, category: 'Beverages', emoji: '🍵' },
+                { id: 130, name: 'Black Tea', price: 1199, category: 'Beverages', emoji: '🍵' },
+                { id: 131, name: 'Herbal Tea', price: 1299, category: 'Beverages', emoji: '🍵' },
+                { id: 132, name: 'Chamomile Tea', price: 1199, category: 'Beverages', emoji: '🍵' },
+                { id: 133, name: 'Peppermint Tea', price: 1199, category: 'Beverages', emoji: '🍵' },
+                { id: 134, name: 'Ginger Tea', price: 1299, category: 'Beverages', emoji: '🍵' },
+                { id: 135, name: 'Kombucha', price: 1499, category: 'Beverages', emoji: '🥤' },
+                { id: 136, name: 'Sparkling Water', price: 699, category: 'Beverages', emoji: '💧' },
+                { id: 137, name: 'Mineral Water', price: 599, category: 'Beverages', emoji: '💧' },
+                { id: 138, name: 'Vitamin Water', price: 899, category: 'Beverages', emoji: '💧' },
+                { id: 139, name: 'Gatorade', price: 799, category: 'Beverages', emoji: '💪' },
+                { id: 140, name: 'Powerade', price: 799, category: 'Beverages', emoji: '💪' },
+
+                // GROCERY - FROZEN (30 products)
+                { id: 141, name: 'Ice Cream', price: 1799, category: 'Frozen', emoji: '🍦' },
+                { id: 142, name: 'Pizza', price: 3199, category: 'Frozen', emoji: '🍕' },
+                { id: 143, name: 'Vegetables', price: 1399, category: 'Frozen', emoji: '🥕' },
+                { id: 144, name: 'Berries', price: 2399, category: 'Frozen', emoji: '🫐' },
+                { id: 145, name: 'Frozen Dinner', price: 2499, category: 'Frozen', emoji: '🍱' },
+                { id: 146, name: 'Chicken Nuggets', price: 1999, category: 'Frozen', emoji: '🍗' },
+                { id: 147, name: 'French Fries', price: 1599, category: 'Frozen', emoji: '🍟' },
+                { id: 148, name: 'Frozen Fruit', price: 1899, category: 'Frozen', emoji: '🍓' },
+                { id: 149, name: 'Frozen Shrimp', price: 3499, category: 'Frozen', emoji: '🦐' },
+                { id: 150, name: 'Frozen Fish', price: 2999, category: 'Frozen', emoji: '🐟' },
+                { id: 151, name: 'Frozen Steak', price: 3999, category: 'Frozen', emoji: '🥩' },
+                { id: 152, name: 'Frozen Chicken', price: 2499, category: 'Frozen', emoji: '🍗' },
+                { id: 153, name: 'Popsicles', price: 1299, category: 'Frozen', emoji: '🍦' },
+                { id: 154, name: 'Gelato', price: 1999, category: 'Frozen', emoji: '🍦' },
+                { id: 155, name: 'Sorbet', price: 1699, category: 'Frozen', emoji: '🍧' },
+                { id: 156, name: 'Frozen Yogurt', price: 1499, category: 'Frozen', emoji: '🍦' },
+                { id: 157, name: 'Frozen Burritos', price: 1799, category: 'Frozen', emoji: '🌯' },
+                { id: 158, name: 'Frozen Tacos', price: 1699, category: 'Frozen', emoji: '🌮' },
+                { id: 159, name: 'Frozen Waffles', price: 1399, category: 'Frozen', emoji: '🧇' },
+                { id: 160, name: 'Frozen Pancakes', price: 1399, category: 'Frozen', emoji: '🥞' },
+                { id: 161, name: 'Frozen Mozzarella Sticks', price: 1599, category: 'Frozen', emoji: '🧀' },
+                { id: 162, name: 'Frozen Onion Rings', price: 1499, category: 'Frozen', emoji: '🧅' },
+                { id: 163, name: 'Frozen Broccoli', price: 1199, category: 'Frozen', emoji: '🥦' },
+                { id: 164, name: 'Frozen Corn', price: 999, category: 'Frozen', emoji: '🌽' },
+                { id: 165, name: 'Frozen Peas', price: 999, category: 'Frozen', emoji: '🫘' },
+                { id: 166, name: 'Frozen Mixed Vegetables', price: 1099, category: 'Frozen', emoji: '🥕' },
+                { id: 167, name: 'Frozen Spinach', price: 1099, category: 'Frozen', emoji: '🥬' },
+                { id: 168, name: 'Frozen Edamame', price: 1299, category: 'Frozen', emoji: '🫘' },
+                { id: 169, name: 'Frozen Meatballs', price: 1999, category: 'Frozen', emoji: '🍖' },
+                { id: 170, name: 'Frozen Sausage', price: 2199, category: 'Frozen', emoji: '🌭' },
+
+                // GROCERY - PANTRY (40 products)
+                { id: 171, name: 'Bread', price: 999, category: 'Pantry', emoji: '🍞' },
+                { id: 172, name: 'Pasta', price: 799, category: 'Pantry', emoji: '🍝' },
+                { id: 173, name: 'Rice', price: 1399, category: 'Pantry', emoji: '🍚' },
+                { id: 174, name: 'Olive Oil', price: 3599, category: 'Pantry', emoji: '🫒' },
+                { id: 175, name: 'Cereal', price: 1199, category: 'Pantry', emoji: '🥣' },
+                { id: 176, name: 'Oatmeal', price: 999, category: 'Pantry', emoji: '🥣' },
+                { id: 177, name: 'Flour', price: 699, category: 'Pantry', emoji: '🌾' },
+                { id: 178, name: 'Sugar', price: 599, category: 'Pantry', emoji: '🍬' },
+                { id: 179, name: 'Salt', price: 399, category: 'Pantry', emoji: '🧂' },
+                { id: 180, name: 'Pepper', price: 499, category: 'Pantry', emoji: '🌶️' },
+                { id: 181, name: 'Cinnamon', price: 799, category: 'Pantry', emoji: '🌶️' },
+                { id: 182, name: 'Vanilla Extract', price: 1299, category: 'Pantry', emoji: '🍦' },
+                { id: 183, name: 'Baking Powder', price: 599, category: 'Pantry', emoji: '🥖' },
+                { id: 184, name: 'Baking Soda', price: 499, category: 'Pantry', emoji: '🥖' },
+                { id: 185, name: 'Peanut Butter', price: 1199, category: 'Pantry', emoji: '🥜' },
+                { id: 186, name: 'Jelly', price: 899, category: 'Pantry', emoji: '🍓' },
+                { id: 187, name: 'Honey', price: 1299, category: 'Pantry', emoji: '🍯' },
+                { id: 188, name: 'Maple Syrup', price: 1599, category: 'Pantry', emoji: '🍁' },
+                { id: 189, name: 'Ketchup', price: 699, category: 'Pantry', emoji: '🍅' },
+                { id: 190, name: 'Mustard', price: 599, category: 'Pantry', emoji: '🌭' },
+                { id: 191, name: 'Mayo', price: 799, category: 'Pantry', emoji: '🥚' },
+                { id: 192, name: 'Soy Sauce', price: 699, category: 'Pantry', emoji: '🍜' },
+                { id: 193, name: 'Vinegar', price: 599, category: 'Pantry', emoji: '🍶' },
+                { id: 194, name: 'Worcestershire Sauce', price: 799, category: 'Pantry', emoji: '🍶' },
+                { id: 195, name: 'Hot Sauce', price: 699, category: 'Pantry', emoji: '🌶️' },
+                { id: 196, name: 'Salsa', price: 799, category: 'Pantry', emoji: '🍅' },
+                { id: 197, name: 'Tomato Sauce', price: 699, category: 'Pantry', emoji: '🍅' },
+                { id: 198, name: 'Pasta Sauce', price: 899, category: 'Pantry', emoji: '🍝' },
+                { id: 199, name: 'Canned Beans', price: 599, category: 'Pantry', emoji: '🫘' },
+                { id: 200, name: 'Canned Corn', price: 599, category: 'Pantry', emoji: '🌽' },
+                { id: 201, name: 'Canned Peas', price: 599, category: 'Pantry', emoji: '🫘' },
+                { id: 202, name: 'Canned Tomatoes', price: 699, category: 'Pantry', emoji: '🍅' },
+                { id: 203, name: 'Canned Soup', price: 699, category: 'Pantry', emoji: '🍲' },
+                { id: 204, name: 'Canned Tuna', price: 999, category: 'Pantry', emoji: '🐟' },
+                { id: 205, name: 'Canned Chicken', price: 1099, category: 'Pantry', emoji: '🍗' },
+                { id: 206, name: 'Canned Beef', price: 1199, category: 'Pantry', emoji: '🥩' },
+                { id: 207, name: 'Crackers', price: 749, category: 'Pantry', emoji: '🍘' },
+                { id: 208, name: 'Granola Bars', price: 899, category: 'Pantry', emoji: '🌾' },
+                { id: 209, name: 'Protein Powder', price: 2499, category: 'Pantry', emoji: '💪' },
+                { id: 210, name: 'Coconut Oil', price: 2199, category: 'Pantry', emoji: '🥥' },
+
+                // ELECTRONICS - PHONES (25 products)
+                { id: 211, name: 'iPhone 15', price: 99999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 212, name: 'iPhone 15 Pro', price: 119999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 213, name: 'Samsung Galaxy S24', price: 89999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 214, name: 'Google Pixel 8', price: 79999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 215, name: 'OnePlus 12', price: 69999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 216, name: 'Motorola Edge 50', price: 59999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 217, name: 'Nothing Phone 2', price: 49999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 218, name: 'iPhone 14', price: 79999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 219, name: 'Samsung Galaxy A54', price: 44999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 220, name: 'Google Pixel 7a', price: 49999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 221, name: 'iPhone SE', price: 42999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 222, name: 'Samsung Galaxy Z Fold 5', price: 179999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 223, name: 'Samsung Galaxy Z Flip 5', price: 119999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 224, name: 'OnePlus 11', price: 59999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 225, name: 'Xiaomi 14', price: 69999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 226, name: 'Realme 12 Pro', price: 39999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 227, name: 'Oppo Find X6', price: 74999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 228, name: 'Vivo X90', price: 69999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 229, name: 'Honor 80', price: 54999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 230, name: 'Poco X5', price: 34999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 231, name: 'Redmi Note 13', price: 29999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 232, name: 'Samsung Galaxy S23', price: 79999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 233, name: 'iPhone 13', price: 69999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 234, name: 'Google Pixel 6a', price: 39999, category: 'Electronics - Phones', emoji: '📱' },
+                { id: 235, name: 'OnePlus 10', price: 49999, category: 'Electronics - Phones', emoji: '📱' },
+
+                // ELECTRONICS - LAPTOPS (20 products)
+                { id: 236, name: 'MacBook Pro 16"', price: 249999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 237, name: 'MacBook Pro 14"', price: 199999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 238, name: 'MacBook Air M2', price: 149999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 239, name: 'Dell XPS 15', price: 179999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 240, name: 'Dell XPS 13', price: 119999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 241, name: 'HP Pavilion 15', price: 79999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 242, name: 'Lenovo ThinkPad X1', price: 139999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 243, name: 'ASUS VivoBook 15', price: 69999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 244, name: 'Razer Blade 15', price: 219999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 245, name: 'MSI GE76 Raider', price: 189999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 246, name: 'Alienware M17', price: 239999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 247, name: 'ASUS ROG Zephyrus', price: 199999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 248, name: 'Acer Swift 3', price: 89999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 249, name: 'HP Spectre x360', price: 149999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 250, name: 'Surface Laptop 5', price: 139999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 251, name: 'Surface Book 3', price: 169999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 252, name: 'Lenovo IdeaPad 5', price: 74999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 253, name: 'HP Envy 13', price: 99999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 254, name: 'ASUS TUF Gaming', price: 129999, category: 'Electronics - Laptops', emoji: '💻' },
+                { id: 255, name: 'Lenovo Legion 5', price: 109999, category: 'Electronics - Laptops', emoji: '💻' },
+
+                // ELECTRONICS - TABLETS (20 products)
+                { id: 256, name: 'iPad Pro 12.9"', price: 119999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 257, name: 'iPad Pro 11"', price: 89999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 258, name: 'iPad Air', price: 69999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 259, name: 'iPad', price: 39999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 260, name: 'iPad Mini', price: 49999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 261, name: 'Samsung Galaxy Tab S9', price: 89999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 262, name: 'Samsung Galaxy Tab S9 FE', price: 34999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 263, name: 'Samsung Galaxy Tab A9', price: 24999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 264, name: 'Microsoft Surface Go 3', price: 49999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 265, name: 'Microsoft Surface Pro 9', price: 129999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 266, name: 'Lenovo Tab P12 Pro', price: 79999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 267, name: 'Lenovo Tab M10', price: 24999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 268, name: 'OnePlus Pad', price: 59999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 269, name: 'Google Pixel Tablet', price: 49999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 270, name: 'Amazon Fire HD 10', price: 19999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 271, name: 'Amazon Fire Max 11', price: 29999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 272, name: 'Huawei MatePad Pro', price: 74999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 273, name: 'Xiaomi Pad 6', price: 39999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 274, name: 'ASUS Pad Fold 3', price: 129999, category: 'Electronics - Tablets', emoji: '📱' },
+                { id: 275, name: 'Samsung Galaxy Tab S8', price: 69999, category: 'Electronics - Tablets', emoji: '📱' },
+
+                // ELECTRONICS - ACCESSORIES (50 products)
+                { id: 276, name: 'AirPods Pro', price: 24999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 277, name: 'AirPods Max', price: 54999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 278, name: 'Sony WH-1000XM5', price: 39999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 279, name: 'Bose QuietComfort 45', price: 34999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 280, name: 'Beats Studio Pro', price: 34999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 281, name: 'Samsung Galaxy Buds', price: 14999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 282, name: 'Google Pixel Buds', price: 19999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 283, name: 'Anker Soundcore', price: 9999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 284, name: 'JBL Tune 750', price: 19999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 285, name: 'Sennheiser Momentum', price: 39999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 286, name: 'iPhone 15 Case', price: 1999, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 287, name: 'Samsung Phone Case', price: 1499, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 288, name: 'iPad Case', price: 2999, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 289, name: 'Laptop Sleeve', price: 3999, category: 'Electronics - Accessories', emoji: '💻' },
+                { id: 290, name: 'USB-C Cable', price: 999, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 291, name: 'Lightning Cable', price: 1199, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 292, name: 'Micro USB Cable', price: 799, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 293, name: 'HDMI Cable', price: 1299, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 294, name: 'USB Hub', price: 2999, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 295, name: 'Wireless Charger', price: 3999, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 296, name: 'Fast Charger', price: 2499, category: 'Electronics - Accessories', emoji: '🔌' },
+                { id: 297, name: 'Power Bank', price: 3999, category: 'Electronics - Accessories', emoji: '🔋' },
+                { id: 298, name: 'Screen Protector', price: 799, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 299, name: 'Tempered Glass', price: 1299, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 300, name: 'Phone Stand', price: 1999, category: 'Electronics - Accessories', emoji: '📱' },
+                { id: 301, name: 'Laptop Stand', price: 4999, category: 'Electronics - Accessories', emoji: '💻' },
+                { id: 302, name: 'Keyboard', price: 9999, category: 'Electronics - Accessories', emoji: '⌨️' },
+                { id: 303, name: 'Mouse', price: 4999, category: 'Electronics - Accessories', emoji: '🖱️' },
+                { id: 304, name: 'Mechanical Keyboard', price: 19999, category: 'Electronics - Accessories', emoji: '⌨️' },
+                { id: 305, name: 'Gaming Mouse', price: 7999, category: 'Electronics - Accessories', emoji: '🖱️' },
+                { id: 306, name: 'Monitor', price: 34999, category: 'Electronics - Accessories', emoji: '🖥️' },
+                { id: 307, name: '4K Monitor', price: 59999, category: 'Electronics - Accessories', emoji: '🖥️' },
+                { id: 308, name: 'Gaming Monitor', price: 49999, category: 'Electronics - Accessories', emoji: '🖥️' },
+                { id: 309, name: 'Webcam', price: 9999, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 310, name: 'Microphone', price: 14999, category: 'Electronics - Accessories', emoji: '🎤' },
+                { id: 311, name: 'USB Microphone', price: 9999, category: 'Electronics - Accessories', emoji: '🎤' },
+                { id: 312, name: 'Ring Light', price: 4999, category: 'Electronics - Accessories', emoji: '💡' },
+                { id: 313, name: 'Tripod', price: 3999, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 314, name: 'Phone Tripod', price: 2499, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 315, name: 'DSLR Camera', price: 89999, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 316, name: 'Mirrorless Camera', price: 119999, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 317, name: 'Action Camera', price: 39999, category: 'Electronics - Accessories', emoji: '📷' },
+                { id: 318, name: 'Drone', price: 79999, category: 'Electronics - Accessories', emoji: '🚁' },
+                { id: 319, name: 'Smart Watch', price: 34999, category: 'Electronics - Accessories', emoji: '⌚' },
+                { id: 320, name: 'Fitness Tracker', price: 14999, category: 'Electronics - Accessories', emoji: '⌚' },
+                { id: 321, name: 'Smart Ring', price: 29999, category: 'Electronics - Accessories', emoji: '💍' },
+                { id: 322, name: 'VR Headset', price: 49999, category: 'Electronics - Accessories', emoji: '🥽' },
+                { id: 323, name: 'Gaming Headset', price: 14999, category: 'Electronics - Accessories', emoji: '🎧' },
+                { id: 324, name: 'Portable Speaker', price: 9999, category: 'Electronics - Accessories', emoji: '🔊' },
+                { id: 325, name: 'Bluetooth Speaker', price: 7999, category: 'Electronics - Accessories', emoji: '🔊' },
+
+                // ELECTRONICS - SMART HOME (25 products)
+                { id: 326, name: 'Echo Dot', price: 4999, category: 'Electronics - Smart Home', emoji: '🔊' },
+                { id: 327, name: 'Echo Show 5', price: 8999, category: 'Electronics - Smart Home', emoji: '📺' },
+                { id: 328, name: 'Echo Show 8', price: 12999, category: 'Electronics - Smart Home', emoji: '📺' },
+                { id: 329, name: 'Google Home Mini', price: 4999, category: 'Electronics - Smart Home', emoji: '🔊' },
+                { id: 330, name: 'Google Home', price: 9999, category: 'Electronics - Smart Home', emoji: '🔊' },
+                { id: 331, name: 'Google Nest Hub', price: 9999, category: 'Electronics - Smart Home', emoji: '📺' },
+                { id: 332, name: 'Google Nest Hub Max', price: 22999, category: 'Electronics - Smart Home', emoji: '📺' },
+                { id: 333, name: 'Smart Light Bulb', price: 2499, category: 'Electronics - Smart Home', emoji: '💡' },
+                { id: 334, name: 'Smart Plug', price: 1999, category: 'Electronics - Smart Home', emoji: '🔌' },
+                { id: 335, name: 'Smart Thermostat', price: 24999, category: 'Electronics - Smart Home', emoji: '🌡️' },
+                { id: 336, name: 'Smart Door Lock', price: 34999, category: 'Electronics - Smart Home', emoji: '🔐' },
+                { id: 337, name: 'Smart Camera', price: 14999, category: 'Electronics - Smart Home', emoji: '📷' },
+                { id: 338, name: 'Doorbell Camera', price: 19999, category: 'Electronics - Smart Home', emoji: '📷' },
+                { id: 339, name: 'Motion Sensor', price: 2999, category: 'Electronics - Smart Home', emoji: '📡' },
+                { id: 340, name: 'Smart Speaker', price: 12999, category: 'Electronics - Smart Home', emoji: '🔊' },
+                { id: 341, name: 'Smart Display', price: 19999, category: 'Electronics - Smart Home', emoji: '📺' },
+                { id: 342, name: 'WiFi Router', price: 14999, category: 'Electronics - Smart Home', emoji: '📡' },
+                { id: 343, name: 'Mesh WiFi', price: 24999, category: 'Electronics - Smart Home', emoji: '📡' },
+                { id: 344, name: 'Smart Vacuum', price: 49999, category: 'Electronics - Smart Home', emoji: '🤖' },
+                { id: 345, name: 'Robot Mop', price: 39999, category: 'Electronics - Smart Home', emoji: '🤖' },
+                { id: 346, name: 'Smart Fridge', price: 199999, category: 'Electronics - Smart Home', emoji: '🧊' },
+                { id: 347, name: 'Smart Oven', price: 149999, category: 'Electronics - Smart Home', emoji: '🔥' },
+                { id: 348, name: 'Smart Washer', price: 129999, category: 'Electronics - Smart Home', emoji: '🧺' },
+                { id: 349, name: 'Smart Dryer', price: 119999, category: 'Electronics - Smart Home', emoji: '🧺' },
+                { id: 350, name: 'Smart Lighting Kit', price: 34999, category: 'Electronics - Smart Home', emoji: '💡' },
+            ],
+            cart: [],
+            currentPage: 'catalog',
+            selectedPaymentMethod: 'apple_pay',
+            lastOrderId: 0,
+            searchQuery: '',
+            currentCategory: 'All',
+
+            init() {
+                this.renderCategories();
+                this.renderProducts();
+            },
+
+            renderCategories() {
+                const categories = ['All', 'Produce', 'Dairy', 'Snacks', 'Beverages', 'Frozen', 'Pantry', 'Electronics - Phones', 'Electronics - Laptops', 'Electronics - Tablets', 'Electronics - Accessories', 'Electronics - Smart Home'];
+                const container = document.getElementById('category-filters');
+                container.innerHTML = categories.map(cat => `
+                    <div class="category-badge ${cat === 'All' ? 'active' : ''}" onclick="app.filterByCategory('${cat}')">
+                        ${cat}
+                    </div>
+                `).join('');
+            },
+
+            filterByCategory(category) {
+                this.currentCategory = category;
+                document.querySelectorAll('.category-badge').forEach(b => b.classList.remove('active'));
+                event.target.classList.add('active');
+                this.renderProducts(category);
+            },
+
+            renderProducts(category = 'All') {
+                let filtered = category === 'All' ? this.products : this.products.filter(p => p.category === category);
+                
+                if (this.searchQuery) {
+                    filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchQuery));
+                }
+
+                const grid = document.getElementById('products-grid');
+                grid.innerHTML = filtered.map(product => `
+                    <div class="product-card">
+                        <div class="product-emoji">${product.emoji}</div>
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <div class="product-price">$${(product.price / 100).toFixed(2)}</div>
+                            <button class="btn btn-spongebob" onclick="app.addToCart(${product.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            handleSearch() {
+                this.searchQuery = document.getElementById('search-input').value.toLowerCase();
+                this.renderProducts(this.currentCategory);
+            },
+
+            addToCart(productId) {
+                const product = this.products.find(p => p.id === productId);
+                const existingItem = this.cart.find(item => item.product.id === productId);
+
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    this.cart.push({ product, quantity: 1 });
+                }
+
+                this.updateCartBadge();
+            },
+
+            updateCartBadge() {
+                const count = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                document.getElementById('cart-count').textContent = count;
+            },
+
+            renderCart() {
+                const cartContainer = document.getElementById('cart-items');
+
+                if (this.cart.length === 0) {
+                    cartContainer.innerHTML = '<div class="empty-cart">🛒 Your cart is empty!</div>';
+                    document.getElementById('cart-subtotal').textContent = '$0.00';
+                    document.getElementById('cart-tax').textContent = '$0.00';
+                    document.getElementById('cart-total').textContent = '$0.00';
+                    return;
+                }
+
+                const subtotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+                const tax = Math.round(subtotal * 0.08);
+                const total = subtotal + tax;
+
+                cartContainer.innerHTML = this.cart.map((item, index) => `
+                    <div class="cart-item">
+                        <div class="cart-item-emoji">${item.product.emoji}</div>
+                        <div class="cart-item-details">
+                            <h3>${item.product.name}</h3>
+                            <div class="cart-item-price">$${(item.product.price / 100).toFixed(2)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="app.updateQuantity(${index}, -1)">−</button>
+                            <span style="min-width: 25px; text-align: center; font-weight: bold; font-size: 0.9rem;">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="app.updateQuantity(${index}, 1)">+</button>
+                            <button class="delete-btn" onclick="app.removeFromCart(${index})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('cart-subtotal').textContent = `$${(subtotal / 100).toFixed(2)}`;
+                document.getElementById('cart-tax').textContent = `$${(tax / 100).toFixed(2)}`;
+                document.getElementById('cart-total').textContent = `$${(total / 100).toFixed(2)}`;
+            },
+
+            updateQuantity(index, change) {
+                this.cart[index].quantity += change;
+                if (this.cart[index].quantity <= 0) {
+                    this.removeFromCart(index);
+                } else {
+                    this.renderCart();
+                    this.updateCartBadge();
+                }
+            },
+
+            removeFromCart(index) {
+                this.cart.splice(index, 1);
+                this.renderCart();
+                this.updateCartBadge();
+            },
+
+            goToCart() {
+                this.currentPage = 'cart';
+                this.showPage('cart-page');
+                this.renderCart();
+            },
+
+            goToCheckout() {
+                if (this.cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+                this.currentPage = 'checkout';
+                this.showPage('checkout-page');
+                this.renderCheckoutSummary();
+            },
+
+            renderCheckoutSummary() {
+                const subtotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+                const tax = Math.round(subtotal * 0.08);
+                const total = subtotal + tax;
+
+                const itemsHtml = this.cart.map(item => `
+                    <div style="padding: 0.5rem; background: #f0f0f0; border-radius: 0.4rem; margin-bottom: 0.4rem; font-size: 0.85rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>${item.product.emoji} ${item.product.name} x${item.quantity}</span>
+                            <span style="font-weight: bold;">$${((item.product.price * item.quantity) / 100).toFixed(2)}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('checkout-items').innerHTML = itemsHtml;
+                document.getElementById('checkout-subtotal').textContent = `$${(subtotal / 100).toFixed(2)}`;
+                document.getElementById('checkout-tax').textContent = `$${(tax / 100).toFixed(2)}`;
+                document.getElementById('checkout-total').textContent = `$${(total / 100).toFixed(2)}`;
+            },
+
+            selectPaymentMethod(method) {
+                this.selectedPaymentMethod = method;
+                document.getElementById('apple-pay-section').style.display = method === 'apple_pay' ? 'block' : 'none';
+                document.getElementById('samsung-pay-section').style.display = method === 'samsung_pay' ? 'block' : 'none';
+                document.getElementById('google-pay-section').style.display = method === 'google_pay' ? 'block' : 'none';
+                document.getElementById('mobile-pay-section').style.display = method === 'mobile_pay' ? 'block' : 'none';
+                document.getElementById('card-pay-section').style.display = method === 'card' ? 'block' : 'none';
+            },
+
+            formatCardNumber(input) {
+                let value = input.value.replace(/\s/g, '');
+                let formatted = value.replace(/(\d{4})/g, '$1 ').trim();
+                input.value = formatted;
+            },
+
+            formatExpiry(input) {
+                let value = input.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                input.value = value;
+            },
+
+            processPayment(method) {
+                if (method === 'card') {
+                    const cardNumber = document.getElementById('card-number').value;
+                    const cardExpiry = document.getElementById('card-expiry').value;
+                    const cardCvv = document.getElementById('card-cvv').value;
+
+                    if (!cardNumber || !cardExpiry || !cardCvv) {
+                        alert('❌ Please fill in all card details');
+                        return;
+                    }
+
+                    if (cardNumber.replace(/\s/g, '').length < 13) {
+                        alert('❌ Invalid card number');
+                        return;
+                    }
+
+                    if (cardExpiry.length < 5) {
+                        alert('❌ Invalid expiry date');
+                        return;
+                    }
+
+                    if (cardCvv.length < 3) {
+                        alert('❌ Invalid CVV');
+                        return;
+                    }
+                }
+
+                this.lastOrderId = Math.floor(Math.random() * 1000000) + 100000;
+                this.showDeviceNotification();
+            },
+
+            showDeviceNotification() {
+                const subtotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+                const tax = Math.round(subtotal * 0.08);
+                const total = subtotal + tax;
+
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    background: white;
+                    border-radius: 1rem;
+                    padding: 1.5rem;
+                    max-width: 350px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    border: 3px solid var(--spongebob-yellow);
+                `;
+
+                const paymentMethodNames = {
+                    'apple_pay': 'Apple Pay',
+                    'samsung_pay': 'Samsung Pay',
+                    'google_pay': 'Google Pay',
+                    'mobile_pay': 'Mobile Pay',
+                    'card': 'Credit Card'
+                };
+
+                notification.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                        <h2 style="color: var(--spongebob-green); margin-bottom: 0.3rem; font-size: 1.3rem;">Approved!</h2>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #FFFACD, #FFEB99); border-radius: 0.75rem; padding: 1rem; border: 2px solid var(--spongebob-yellow); font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--spongebob-yellow);">
+                            <span>Amount:</span>
+                            <span style="font-weight: bold; color: var(--spongebob-green);">$${(total / 100).toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Merchant:</span>
+                            <span style="font-weight: bold;">Krusty Krab</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Payment:</span>
+                            <span style="font-weight: bold;">${paymentMethodNames[this.selectedPaymentMethod]}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>ID:</span>
+                            <span style="font-weight: bold;">#${this.lastOrderId}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-spongebob" style="margin-top: 1rem; width: 100%;" onclick="this.closest('div').parentElement.remove(); app.showConfirmation();">✓ OK</button>
+                `;
+
+                overlay.appendChild(notification);
+                document.body.appendChild(overlay);
+
+                setTimeout(() => {
+                    if (overlay.parentElement) {
+                        overlay.remove();
+                        this.showConfirmation();
+                    }
+                }, 3000);
+            },
+
+            showConfirmation() {
+                const subtotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+                const tax = Math.round(subtotal * 0.08);
+                const total = subtotal + tax;
+
+                const paymentMethodIcons = {
+                    'apple_pay': '🍎',
+                    'samsung_pay': '📱',
+                    'google_pay': '🔵',
+                    'mobile_pay': '📲',
+                    'card': '💳'
+                };
+
+                const paymentMethodNames = {
+                    'apple_pay': 'Apple Pay',
+                    'samsung_pay': 'Samsung Pay',
+                    'google_pay': 'Google Pay',
+                    'mobile_pay': 'Mobile Pay',
+                    'card': 'Credit Card'
+                };
+
+                document.getElementById('order-number').textContent = `#${this.lastOrderId}`;
+                document.getElementById('order-date').textContent = new Date().toLocaleDateString();
+                document.getElementById('payment-method-display').textContent = `${paymentMethodIcons[this.selectedPaymentMethod]} ${paymentMethodNames[this.selectedPaymentMethod]}`;
+                document.getElementById('confirmation-total').textContent = `$${(total / 100).toFixed(2)}`;
+
+                this.createConfetti();
+                this.cart = [];
+                this.updateCartBadge();
+                
+                if (document.getElementById('card-number')) {
+                    document.getElementById('card-number').value = '';
+                    document.getElementById('card-expiry').value = '';
+                    document.getElementById('card-cvv').value = '';
+                }
+                
+                this.currentPage = 'confirmation';
+                this.showPage('confirmation-page');
+                
+                this.selectedPaymentMethod = 'apple_pay';
+                document.querySelector('input[value="apple_pay"]').checked = true;
+                this.selectPaymentMethod('apple_pay');
+            },
+
+            createConfetti() {
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = ['#FFD700', '#1E90FF', '#FF69B4', '#32CD32', '#FF8C00'][Math.floor(Math.random() * 5)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animation = `confetti-fall 3s ease-in forwards`;
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }
+            },
+
+            goToCatalog() {
+                this.currentPage = 'catalog';
+                this.showPage('catalog-page');
+            },
+
+            showPage(pageId) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            app.init();
+        });
+    </script>
+</body>
+</html>
